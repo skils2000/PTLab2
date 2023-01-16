@@ -1,15 +1,48 @@
+- model: shop.producttype
+  pk: 1
+  fields: 
+    name: Аккумуляторы
+- model: shop.producttype
+  pk: 2
+  fields: 
+    name: Шины
+- model: shop.producttype
+  pk: 3
+  fields: 
+    name: Моторные масла    
 - model: shop.product
   pk: 1
   fields:
-    name: Стол
-    price: 2000
+    name: Cordiant Snow Cross 175/65 R14 82T
+    price: 3250
+    type_id: 2
 - model: shop.product
   pk: 2
   fields:
-    name: Стул
-    price: 1000
+    name: Nokian Tyres Nordman 7 185/65 R15 92T
+    price: 5250
+    type_id: 2    
 - model: shop.product
   pk: 3
   fields:
-    name: Табурет
-    price: 500
+    name: SHELL Helix HX8
+    price: 3000
+    type_id: 3
+- model: shop.product
+  pk: 4
+  fields:
+    name: Моторное масло IDEMITSU Zepro
+    price: 4850
+    type_id: 3
+- model: shop.product
+  pk: 5
+  fields:
+    name: Автомобильный аккумулятор FireBall 6CT-55N
+    price: 4500
+    type_id: 1
+- model: shop.product
+  pk: 6
+  fields:
+    name: Автомобильный аккумулятор Bosch S4 013
+    price: 14500
+    type_id: 1

@@ -4,23 +4,124 @@
     <meta name="viewport" content="width=device-width" />
     <title>Товары</title>
 </head>
-<body>
-    <div>
+<body onload="onLoad()" style="display: flex; gap: 12px;">
+    <div style="width: calc(50% - 6px)">
         <h3>Список</h3>
         <table>
             <tr>
                 <td><p>Наименование</p></td>
                 <td><p>Цена</p></td>
+                <td><p>Тип товара</p></td>
                 <td></td>
             </tr>
             {% for p in products %}
                 <tr>
                     <td><p>{{ p.name }}</p></td>
                     <td><p>{{ p.price }}</p></td>
-                    <td><p><a href="/buy/{{ p.id }}">Купить</a></p></td>
+                    <td><p>{{ p.type.name }}</p></td>
+                    <td><button onclick="add_to_backet({{ p.id }}, {{p.price}}, '{{p.name}}', {{p.type.id}})">+</button></td>
                 </tr>
             {% endfor %}
         </table>
     </div>
+    <div id="buyblock">
+        <h3>Корзина</h3>
+        <h4 id="count">Количество покупок: 0</h4>
+        <table id="basket">
+            <tr>
+                <td><p>Наименование</p></td>
+                <td><p>Цена</p></td>
+            </tr>
+        </table>
+        <p id="buyLink"><a id="buysource" href="#">Купить</a></p>
+    </div>
 </body>
+<script>
+    var bought = [];
+    var buttonClicksForID = 0;
+
+    function onLoad() {
+        var temporary = sessionStorage.getItem('buyList');
+        let buyList = JSON.parse(temporary)
+        if (buyList!==null){
+            for (let i = 0; i<buyList.length; i++){
+                add_to_backet(buyList[i].id, buyList[i].price, buyList[i].name, buyList[i].type)
+            }
+        }
+    }
+
+    function deleteRow(row, id, name, price) {
+        del_id = row.getAttribute("id");
+
+        item = {id: id, price: price, name: name};
+        index = -1
+        for (var i=0; i < bought.length; i++){
+            if(bought[i].id==item.id && bought[i].name==item.name && bought[i].price==item.price){
+                index =  i;
+            }
+        }
+        if (index !== -1){
+            bought.splice(index, 1);
+        }
+
+        sessionStorage.setItem('buyList', JSON.stringify(bought));
+
+        document.getElementById(del_id).remove();
+
+        if (bought.length===0){
+            var url = document.getElementById("buysource");
+            url.setAttribute("href", "");
+        }
+
+        var ids = ''
+        for (var i=0; i < bought.length; i++){
+            if (i == bought.length-1){
+                ids = ids + "product_id="+bought[i].id;
+            }
+            else{ids = ids + "product_id="+bought[i].id+"&";}
+        }
+        var url = document.getElementById("buysource");
+        if (bought.length!==0){
+            url.setAttribute("href", "/buy/?"+ids);
+        }else{
+            url.setAttribute("href", "#");
+        }
+
+        document.getElementById("count").innerHTML = "Количество покупок: " + bought.length;
+
+    }
+
+    function add_to_backet(p1, p2, p3, p4) {
+        bought.push({id: p1, price: p2, name: p3, type: p4});
+
+        var table = document.getElementById("basket");
+        var tr = document.createElement("tr");
+        unindex = "key"+p1+buttonClicksForID;
+        buttonClicksForID++;
+
+        //console.log(bought, p1, p2, p3, p4)
+        pname ="'" + bought[bought.length-1].name + "'";
+        tr.setAttribute("id", unindex);
+        sessionStorage.setItem('buyList', JSON.stringify(bought));
+        tr.innerHTML = '<td>'+ bought[bought.length-1].name + '</td>' + '<td>'+ bought[bought.length-1].price +
+        '</td>' +'<td><button onclick="deleteRow('+unindex+','+bought[bought.length-1].id+','+pname+','+bought[bought.length-1].price+')">-</button></td>';
+        table.appendChild(tr);
+
+
+        var ids = ''
+        for (var i=0; i < bought.length; i++){
+            if (i == bought.length-1){
+                ids = ids + "product_id="+bought[i].id;
+            }
+            else{ids = ids + "product_id="+bought[i].id+"&";}
+        }
+        var url = document.getElementById("buysource");
+        url.setAttribute("href", "/buy/?"+ids);
+
+        document.getElementById("count").innerHTML = "Количество покупок: " + bought.length;
+
+    }
+
+
+</script>
 </html>

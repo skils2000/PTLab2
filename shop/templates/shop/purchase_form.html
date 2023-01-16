@@ -4,11 +4,15 @@
     <meta name="viewport" content="width=device-width" />
     <title>Покупка</title>
 </head>
-<body>
+<body onload="onLoad()">
     <div>
         <h3>Покупка</h3>
         <form method="post">{% csrf_token %}
-            <input type="hidden" value="{{ view.kwargs.product_id }}" name="product" />
+            {%for list_of_elements in request.GET.lists %}
+                {%if list_of_elements.0 == "product_id"%}
+                    <input type="hidden" value="{{ list_of_elements.1|join:',' }}" name="products" />
+                {%endif%}
+            {%endfor%}
             <table>
                 <tr>
                     <td><p>Введите свое имя </p></td>
@@ -20,9 +24,83 @@
                         <input type="text" name="address" />
                     </td>
                 </tr>
-                <tr><td><input type="submit" value="Отправить" /> </td><td></td></tr>
+                <tr><td><input type="submit" value="Отправить" onclick="onSubmit()"/> </td><td></td></tr>
             </table>
         </form>
+        <div id="totalCost" style="width: 200px">
+            <div style="display: flex; justify-content: space-between"><p>Цена со скидкой:</p><p id="withDiscount">0</p></div>
+            <div style="display: flex; justify-content: space-between"><p>Скидка:</p><p id="discount">0</p></div>
+            <div style="display: flex; justify-content: space-between"><p>Цена без скидки:</p><p id="fullPrice">0</p></div>
+        </div>
     </div>
 </body>
+<script>
+
+     function onLoad() {
+        var temporary = sessionStorage.getItem('buyList');
+        let buyList = JSON.parse(temporary)
+
+        var finalPrice = 0
+        var saved = 0
+        var totalCost = 0
+        var itemsWithDiscount = 0
+
+        var typesToCount = []
+
+        for (let i = 0; i<buyList.length; i++){
+            totalCost= totalCost + buyList[i].price;
+
+            let j = typesToCount.findIndex(e => e.type === buyList[i].type)
+            if (j===-1){
+                // не найдено
+                typesToCount.push({type: buyList[i].type, count:1})
+            }
+            else{
+                typesToCount[j].count++;
+            }
+        }
+
+        if (typesToCount.length>2){
+            typesToCount.sort((a,b) =>{
+                return a.count - b.count
+            })
+            //console.log(typesToCount)
+            buyList.sort((a,b) =>{
+                return a.price - b.price
+            })
+
+            itemsWithDiscount = typesToCount[0].count;
+
+            for (let i = 0; i<itemsWithDiscount; i++){
+                saved = saved + parseInt(buyList[0].price/100*40)
+            }
+
+            //console.log(buyList);
+
+
+        }
+        finalPrice = totalCost - saved
+
+        //console.log(finalPrice, saved, totalCost, typesToCount);
+
+        var withDiscount = document.getElementById("withDiscount");
+        var discount = document.getElementById("discount");
+        var fullPrice = document.getElementById("fullPrice");
+
+        //1
+        withDiscount.innerHTML = finalPrice + "p.";
+
+        //2
+        discount.innerHTML = saved + "p.";
+
+        //3
+        fullPrice.innerHTML = totalCost + "р.";
+    }
+
+    function onSubmit() {
+        console.log("submit")
+        sessionStorage.deleteItem('buyList');
+    }
+
+</script>
 </html>
